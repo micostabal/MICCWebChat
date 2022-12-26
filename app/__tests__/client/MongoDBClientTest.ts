@@ -18,6 +18,15 @@ const mockUser: User = new User(
   "pepito@feliz.com"
 );
 
+const mockUserId2 = uuidv4();
+
+const mockUser2: User = new User(
+  mockUserId2,
+  "juanito",
+  "Colecciono tenedores",
+  "juanito@tenedores.tenedor"
+);
+
 const mockConversationId = uuidv4();
 
 const mockConversation: Conversation = new Conversation(
@@ -97,8 +106,8 @@ describe('MongoDb Logic should behave as expected', () => {
   test('should be able to add and get messages to a conversation', async () => {
     await client.postConversation(mockConversation);
     
-    await client.postMessageAndAddToConversation(mockMessage, mockConversationId);
-    await client.postMessageAndAddToConversation(mockMessage2, mockConversationId);
+    await client.saveMessageAndAddToConversation(mockMessage, mockConversationId);
+    await client.saveMessageAndAddToConversation(mockMessage2, mockConversationId);
     
     const possibleConversation: Conversation|null = await client
       .getConversation(mockConversationId);
@@ -115,6 +124,29 @@ describe('MongoDb Logic should behave as expected', () => {
     expect(mockMessage.userId).toEqual(insertedMessages[0].userId);
     expect(mockMessage.text).toEqual(insertedMessages[0].text);
   
+  });
+
+  test(`should be able to get users from a list of ids`, async () => {
+    await client.postUser(mockUser);
+    await client.postUser(mockUser2);
+    
+    const userList: User[] = await client.getUsers([
+      mockUserId,
+      mockUserId2
+    ]);
+    
+    const insertedUser: User = userList
+      .find(usr => usr.id===mockUserId) as User;
+    
+    const insertedUser2: User = userList
+      .find(usr => usr.id===mockUserId2) as User;
+    
+    expect(insertedUser).not.toBe(undefined);
+    expect(insertedUser2).not.toBe(undefined);
+    
+    expect((insertedUser as User).id).toEqual(mockUserId);
+    expect((insertedUser2 as User).id).toEqual(mockUserId2);
+    
   });
 
 

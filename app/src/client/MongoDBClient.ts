@@ -14,7 +14,7 @@ class MongoDBClient {
   client: MongoClient;
   db: Db;
   
-  constructor() {
+  private constructor() {
     this.url = `mongodb://${DB_USER}:${DB_PASS}@localhost:${PORT}`;
     this.client = new MongoClient(this.url);
   }
@@ -55,7 +55,7 @@ class MongoDBClient {
     );
   }
   
-  public async postMessageAndAddToConversation(message: Message, conversationId: string): Promise<void> {
+  public async saveMessageAndAddToConversation(message: Message, conversationId: string): Promise<void> {
     await this.postMessage(message);
     await this.linkMessageAndConversation(message.id, conversationId);
   }
@@ -79,6 +79,23 @@ class MongoDBClient {
     return (await this.db.collection<Message>("message").find(
       {id: {$in: messageIds}}
     ).toArray());
+  }
+  
+  public async getUsers(userIds: string[]): Promise<User[]> {
+    return await this.db.collection<User>("users")
+      .find({id: {$in: userIds}}).toArray();
+  }
+
+  public async userExists(userId: string): Promise<Boolean> {
+    const searchResult: User|null = await this.getUser(userId);
+    if(searchResult===null) return false;
+    return true;
+  }
+
+  public async conversationExists(userId: string): Promise<Boolean> {
+    const searchResult: Conversation|null = await this.getConversation(userId);
+    if(searchResult===null) return false;
+    return true;
   }
   
   public static async getMongoDBClient(db_name: string = DB_NAME): Promise<MongoDBClient> {

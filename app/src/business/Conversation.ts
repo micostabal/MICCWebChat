@@ -1,15 +1,14 @@
-import {v4 as uuidv4} from 'uuid';
-import Message from "./Message";
-import User from "./User";
+import WebChatEntity from "./WebChatEntity";
 
 
-class Conversation {
+class Conversation extends WebChatEntity {
   id: string;
   title: string;
   subject: string;
   messageIds: string[];
   
   constructor(id: string, title: string, subject: string, messageIds: string[]) {
+    super();
     this.id=id;
     this.title=title;
     this.subject=subject;
