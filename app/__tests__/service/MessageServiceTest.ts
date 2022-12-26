@@ -1,6 +1,12 @@
 
 import {describe, expect, test, jest, beforeAll, afterAll } from '@jest/globals';
-import { IGetConversationInformationPayload } from '../../src/interface/controller';
+import {
+  IGetConversationInformationPayload,
+  IPostConversationInput,
+  IConversation,
+  IPostMessageInput,
+  IPostMessagePayload
+} from '../../src/interface/controller';
 import Message from '../../src/business/Message';
 import MessageService from "../../src/service/MessageService";
 import MongoDBClient from "../../src/client/MongoDBClient";
@@ -11,6 +17,20 @@ import User from '../../src/business/User';
 describe('Unit tests for the API\'s Message Service', ()=>{
   
   let messageService: MessageService;
+
+  const userId = "user-1234";
+  const user = new User(userId, "mock user", "mock desc", "mock@usr.com");
+  
+  const messageId = "mess-1234";
+  const message = new Message(messageId,userId,"random text");
+  
+  const conversationId = "conv-1234";
+  const conversation = new Conversation(conversationId,"mock title","mock subject",[messageId]);
+
+  const conversationInput: IPostConversationInput = {
+    title: "mock title",
+    subject: "mock subject"
+  };
   
   beforeAll( async () => {
     messageService = new MessageService();
@@ -22,16 +42,6 @@ describe('Unit tests for the API\'s Message Service', ()=>{
   });
   
   test('It should get the conversation\'s information', async () => {
-    
-    const userId = "user-1234";
-    const user = new User(userId, "mock user", "mock desc", "mock@usr.com");
-    
-    const messageId = "mess-1234";
-    const message = new Message(messageId,userId,"random text");
-    
-    const conversationId = "conv-1234";
-    const conversation = new Conversation(conversationId,"mock title","mock subject",[messageId]);
-    
     
     jest.spyOn(MongoDBClient.prototype, 'getConversation').mockImplementation(
       async (conversationId: string) => conversation);
@@ -48,4 +58,40 @@ describe('Unit tests for the API\'s Message Service', ()=>{
     expect(response.users[0]).toBe(user);
     
   });
+  
+  test('should be able to save a conversation', async () => {
+    jest.spyOn(MongoDBClient.prototype, 'postConversation').mockImplementation(
+      async (conversation : Conversation) => {});
+    
+    const {conversation: savedConv}: IConversation = await messageService.saveConversation(
+      conversationInput);
+    
+    expect(savedConv.title).toEqual(conversationInput.title);
+    expect(savedConv.subject).toEqual(conversationInput.subject);
+
+  });
+
+  test('it should be able to save new messages', async () => {
+    jest.spyOn(MongoDBClient.prototype, 'userExists').mockImplementation(
+      async (userId : string) => {return true});
+    jest.spyOn(MongoDBClient.prototype, 'conversationExists').mockImplementation(
+      async (convId : string) => {return true});
+    jest.spyOn(MongoDBClient.prototype, 'saveMessageAndAddToConversation').mockImplementation(
+      async (message: Message, conversationId : string) => {});
+    
+    const mockText=" MooOck text";
+    
+    const postMessageInput: IPostMessageInput = {
+      text: mockText,
+      conversationId,
+      userId
+    };
+    
+    const {message: insertedMessage}: IPostMessagePayload = await messageService.saveNewMessage(postMessageInput);
+    
+    expect(insertedMessage.text).toEqual(mockText);
+    expect(insertedMessage.userId).toEqual(userId);
+  });
+
+
 });
