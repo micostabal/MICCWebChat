@@ -23,6 +23,12 @@ class MessageService {
   async closeClient() {
     await this.dbClient.closeDB();
   }
+
+  static async getService() {
+    const messageService: MessageService = new MessageService();
+    await messageService.initClient();
+    return messageService;
+  }
   
   async getConversationInformationHandler(id: string): Promise<IGetConversationInformationPayload> {
     
@@ -32,7 +38,7 @@ class MessageService {
 
     const conversation: Conversation = await this.dbClient.getConversation(id) as Conversation;
     const messages = await this.dbClient.getMessages(id);
-    const users = await this.dbClient.getUsers(messages.map(message => message.userId));
+    const users = await this.dbClient.getUsers(messages.map(message => message.userId))
 
     return {
       conversation,

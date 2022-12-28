@@ -1,10 +1,5 @@
-import express from "express";
-import { Server } from "typescript-rest";
+import WebChatApp from "./controller/WebChatApp";
 
-let app: express.Application = express();
-Server.loadServices(app, 'controller/*', __dirname);
-Server.buildServices(app);
+const app: WebChatApp = new WebChatApp();
 
-app.listen(3000, function() {
-  console.log('Rest Server listening on port 3000!');
-});
+app.run();
