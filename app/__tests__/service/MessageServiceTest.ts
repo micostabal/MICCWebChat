@@ -32,11 +32,12 @@ describe('Unit tests for the API\'s Message Service', ()=>{
     subject: "mock subject"
   };
   
+  const mockText=" MooOck text";
+  
   beforeAll( async () => {
-    messageService = new MessageService();
-    await messageService.initClient();
+    messageService = await MessageService.getService();
   });
-
+  
   afterAll( async () => {
     await messageService.closeClient();
   });
@@ -78,8 +79,6 @@ describe('Unit tests for the API\'s Message Service', ()=>{
       async (convId : string) => {return true});
     jest.spyOn(MongoDBClient.prototype, 'saveMessageAndAddToConversation').mockImplementation(
       async (message: Message, conversationId : string) => {});
-    
-    const mockText=" MooOck text";
     
     const postMessageInput: IPostMessageInput = {
       text: mockText,

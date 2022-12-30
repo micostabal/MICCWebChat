@@ -11,17 +11,20 @@ const DB_PASS = "admin_mongo";
 
 class MongoDBClient {
   url: string;
-  client: MongoClient;
+  static singletonInstance: MongoDBClient;
+  static client: MongoClient;
   db: Db;
   
   private constructor() {
     this.url = `mongodb://${DB_USER}:${DB_PASS}@localhost:${PORT}`;
-    this.client = new MongoClient(this.url);
+    if (!MongoDBClient.client) {
+      MongoDBClient.client = new MongoClient(this.url);
+    };
   }
   
   public async initDB(db_name: string) {
-    await this.client.connect();
-    this.db = this.client.db(db_name);
+    await MongoDBClient.client.connect();
+    this.db = MongoDBClient.client.db(db_name);
   }
 
   public async restartDB(db_name: string) {
@@ -30,11 +33,11 @@ class MongoDBClient {
   }
 
   public async closeDB() {
-    await this.client.close();
+    await MongoDBClient.client.close();
   }
 
   public getMongoClient(): MongoClient {
-    return this.client
+    return MongoDBClient.client
   };
   
   public async postUser(user: User): Promise<void> {
@@ -99,17 +102,11 @@ class MongoDBClient {
   }
   
   public static async getMongoDBClient(db_name: string = DB_NAME): Promise<MongoDBClient> {
-    const instance = new MongoDBClient();
-    
-    return new Promise( (resolve, reject) => {
-      try {
-        instance.initDB(db_name).then( () => {
-          resolve(instance);
-        });
-      } catch {
-        reject();
-      }
-    });
+    if (!MongoDBClient.singletonInstance) {
+      MongoDBClient.singletonInstance = new MongoDBClient();
+      await MongoDBClient.singletonInstance.initDB(db_name);
+    }
+    return MongoDBClient.singletonInstance;
   }
 
 }

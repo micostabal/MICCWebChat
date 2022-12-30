@@ -5,10 +5,6 @@ import Conversation from '../../src/business/Conversation';
 import Message from '../../src/business/Message';
 import MongoDBClient from '../../src/client/MongoDBClient';
 
-function sum(a: number, b: number): Number {
-  return a+b;
-}
-
 const mockUserId = uuidv4();
 
 const mockUser: User = new User(

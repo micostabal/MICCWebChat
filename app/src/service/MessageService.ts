@@ -19,7 +19,7 @@ class MessageService {
   async initClient() {
     this.dbClient= await MongoDBClient.getMongoDBClient();
   }
-
+  
   async closeClient() {
     await this.dbClient.closeDB();
   }
