@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "npx jest --maxWorkers=1 --verbose",
+    "test": "npx jest --maxWorkers=1 --verbose --forceExit",
     "dev": "nodemon src/server.ts",
     "build": "rm -rf build/ && prettier --write src/ && tsc"
   },
