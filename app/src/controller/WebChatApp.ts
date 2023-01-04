@@ -57,7 +57,7 @@ class WebChatApp {
       )
     );
   }
-
+  
   static async getApp(): Promise<WebChatApp> {
     const app: WebChatApp = new WebChatApp();
     await app.run();
